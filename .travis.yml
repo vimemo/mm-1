@@ -19,10 +19,10 @@ env:
     - COUCH_NODE_NAME=nonode@nohost
     - PUBLIC_UPLOAD_URL=http://admin:pass@localhost:5984
     - |
-      if [[ -z "$UPLOAD_URL" ]]; then
-        EXTERNAL_CONTRIBUTOR=true
-      else
+      if [ -z "$UPLOAD_URL" ]; then
         EXTERNAL_CONTRIBUTOR=false
+      else
+        EXTERNAL_CONTRIBUTOR=true
       fi
 
 
@@ -78,7 +78,7 @@ jobs:
       after_success:
         - node --stack_size=10000 `which grunt` publish-for-testing
     - stage: publish
-      if: type != pull_request
+      if: type != pull_request AND NOT EXTERNAL_CONTRIBUTOR
       env: NODE_VERSION=10
       before_script: # overwrite default
       script:
