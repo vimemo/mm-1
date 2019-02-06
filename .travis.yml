@@ -20,9 +20,9 @@ env:
     - PUBLIC_UPLOAD_URL=http://admin:pass@localhost:5984
     - |
       if [ -z "$UPLOAD_URL" ]; then
-        EXTERNAL_CONTRIBUTOR=false
+        EXTERNAL_CONTRIBUTOR=false;
       else
-        EXTERNAL_CONTRIBUTOR=true
+        EXTERNAL_CONTRIBUTOR=true;
       fi
 
 
