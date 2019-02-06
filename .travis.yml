@@ -17,7 +17,14 @@ env:
   global:
     - COUCH_URL=http://admin:pass@localhost:5984/medic-test
     - COUCH_NODE_NAME=nonode@nohost
-    - EXTERNAL_CONTRIBUTOR=env(UPLOAD_URL) IS NOT present
+    - PUBLIC_UPLOAD_URL=http://admin:pass@localhost:5984
+    - |
+      if [[ -z "$UPLOAD_URL" ]]; then
+        EXTERNAL_CONTRIBUTOR=true
+      else
+        EXTERNAL_CONTRIBUTOR=false
+      fi
+
 
 before_install:
   - export PATH=$PATH:$HOME/.local/bin
