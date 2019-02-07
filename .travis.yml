@@ -25,5 +25,8 @@ before_script:
   # - npm install -g grunt-cli
   # - npm install -g horticulturalist
   # - ./scripts/travis/couch-config
-  - if [[ -z "$UPLOAD_URL" ]]; then export EXTERNAL_CONTRIBUTOR=true fi
+  - |
+    if [[ -z "$UPLOAD_URL" ]]; then
+      export EXTERNAL_CONTRIBUTOR=true
+    fi
   - echo ">>>>>>>>>>>>>>>>>>>EXTERNAL_CONTRIBUTOR=${EXTERNAL_CONTRIBUTOR}"
