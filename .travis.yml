@@ -18,6 +18,7 @@ env:
     - COUCH_URL=http://admin:pass@localhost:5984/medic-test
     - COUCH_NODE_NAME=nonode@nohost
     - PUBLIC_UPLOAD_URL=http://admin:pass@localhost:5984
+    # - [-z "$UPLOAD_URL"] && EXTERNAL_CONTRIBUTOR=true || EXTERNAL_CONTRIBUTOR=false
     - EXTERNAL_CONTRIBUTOR=([-z "$UPLOAD_URL"])
 
 before_install:
@@ -34,9 +35,8 @@ before_script:
   - npm install -g grunt-cli
   - npm install -g horticulturalist
   - ./scripts/travis/couch-config
-  - [-z "$UPLOAD_URL"] && EXTERNAL_CONTRIBUTOR=true || EXTERNAL_CONTRIBUTOR=false
   # - if [ -z "$XUPLOAD_URL" ]; then EXTERNAL_CONTRIBUTOR=xxx fi
-  - echo "EXTERNAL_CONTRIBUTOR=${EXTERNAL_CONTRIBUTOR}"
+  # - echo "EXTERNAL_CONTRIBUTOR=${EXTERNAL_CONTRIBUTOR}"
   - echo "HORTI_BUILDS_SERVER=${UPLOAD_URL}/_couch/builds_testing"
   - echo "--install=medic:medic:test-${TRAVIS_BUILD_NUMBER}"
   - echo "COUCH_URL=${COUCH_URL}"
