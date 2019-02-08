@@ -8,7 +8,6 @@ addons:
   chrome: 'stable'
 
 services:
-  # docker is used for couchdb 2.0 (not currently available as a travis service)
   - docker
 
 env:
@@ -19,7 +18,6 @@ env:
     - COUCH_NODE_NAME=nonode@nohost
     - PUBLIC_UPLOAD_URL=http://admin:pass@localhost:5984
     - [-z "$UPLOAD_URL"] && EXTERNAL_CONTRIBUTOR=true || EXTERNAL_CONTRIBUTOR=false
-    # - EXTERNAL_CONTRIBUTOR=([-z "$UPLOAD_URL"])
 
 before_install:
   - export PATH=$PATH:$HOME/.local/bin
