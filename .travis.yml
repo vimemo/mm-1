@@ -1,14 +1,9 @@
-# Setting up as a java project allows us to ensure that the JRE/JDK version used
-# is actually compatible with webdriver-manager.
 language: java
 sudo: true
 jdk: oraclejdk8
 
 addons:
   chrome: 'stable'
-
-services:
-  - docker
 
 env:
   matrix:
@@ -17,97 +12,20 @@ env:
     - COUCH_URL=http://admin:pass@localhost:5984/medic-test
     - COUCH_NODE_NAME=nonode@nohost
     - PUBLIC_UPLOAD_URL=http://admin:pass@localhost:5984
-    - [-z "$UPLOAD_URL"] && EXTERNAL_CONTRIBUTOR=true || EXTERNAL_CONTRIBUTOR=false
-
-before_install:
-  - export PATH=$PATH:$HOME/.local/bin
-  - export PATH=$HOME/.npm/bin:$PATH
-  - ./scripts/travis/couch-start
-
-install: nvm install $NODE_VERSION
+    # - [-z "$UPLOAD_URL"] && EXTERNAL_CONTRIBUTOR=true || EXTERNAL_CONTRIBUTOR=false
+    - EXTERNAL_CONTRIBUTOR=false
 
 before_script:
-  - mkdir tests/logs
-  - nvm use $NODE_VERSION
-  - ./scripts/travis/npm-init
-  - npm install -g grunt-cli
-  - npm install -g horticulturalist
-  - ./scripts/travis/couch-config
-  - [-z "$UPLOAD_URL"] && EXTERNAL_CONTRIBUTOR=true || EXTERNAL_CONTRIBUTOR=false
-  # - if [ -z "$XUPLOAD_URL" ]; then EXTERNAL_CONTRIBUTOR=xxx fi
-  - echo "EXTERNAL_CONTRIBUTOR=${EXTERNAL_CONTRIBUTOR}"
-  - echo "HORTI_BUILDS_SERVER=${UPLOAD_URL}/_couch/builds_testing"
-  - echo "--install=medic:medic:test-${TRAVIS_BUILD_NUMBER}"
-  - echo "COUCH_URL=${COUCH_URL}"
-  - curl ${COUCH_URL}
-  - COUCH_URL=$COUCH_URL HORTI_BUILDS_SERVER=$UPLOAD_URL/_couch/builds_testing horti --local --install=medic:medic:test-$TRAVIS_BUILD_NUMBER > tests/logs/horti.log &
-
-script:
+  # - mkdir tests/logs
+  # - nvm use $NODE_VERSION
+  # - ./scripts/travis/npm-init
+  # - npm install -g grunt-cli
+  # - npm install -g horticulturalist
+  # - ./scripts/travis/couch-config
   - |
-    if [[ "$TEST_SUITE" = 'integration' ]]; then
-      node --stack_size=10000 `which grunt` ci-e2e
-    elif [[ "$TEST_SUITE" = 'performance' ]]; then
-      node --stack_size=10000 `which grunt` ci-performance
-    else
-      echo "ERROR No or unknown value for TEST_SUITE env var ('${TEST_SUITE}')."
-      exit 1
+    if [[ -z "$UPLOAD_URL" ]]; then
+      export EXTERNAL_CONTRIBUTOR=true
+      export UPLOAD_URL=$PUBLIC_UPLOAD_URL
     fi
-
-stages:
-  - compile
-  - test
-  - publish
-
-jobs:
-  include:
-    - stage: compile
-      env: NODE_VERSION=10
-      before_script:
-        - ./scripts/travis/npm-init
-        - npm install -g grunt-cli
-        - ./scripts/travis/couch-config
-        - mkdir tests/logs
-      script:
-        - node --stack_size=10000 `which grunt` ci-compile
-      after_failure: # overwrite default
-      after_success:
-        - node --stack_size=10000 `which grunt` publish-for-testing
-    - stage: publish
-      if: type != pull_request AND NOT EXTERNAL_CONTRIBUTOR
-      env: NODE_VERSION=10
-      before_script: # overwrite default
-      script:
-        - cd scripts/travis
-        - npm install
-        - node ./publish.js
-        - cd ../../
-      after_failure: # overwrite default
-      after_script:
-        - node scripts/travis/cleanup.js # clean up testing ddoc
-
-after_failure:
-  - node scripts/travis/cleanup.js # clean up testing ddoc
-  - pip install --user awscli
-  - |
-    (cd tests/logs
-      for log in $(ls *.log); do
-        echo "---------- $log ----------"
-        tail "$log"
-        echo "--------------------------"
-      done
-    )
-
-    [[ "$TRAVIS_BUILD_STAGE_NAME" = "Test" ]] || return
-
-    if [[ "$TRAVIS_PULL_REQUEST" = true ]]; then
-      S3_PATH=s3://mockerymocks/PR_$TRAVIS_PULL_REQUEST
-    else
-      S3_PATH=s3://mockerymocks/BUILD_$TRAVIS_BUILD_NUMBER/JOB_$TRAVIS_JOB_NUMBER
-    fi
-
-    echo "Uploading logs and screenshots to ${S3_PATH}..."
-
-    docker logs couch > tests/logs/couch.log 2>&1
-
-    aws s3 cp tests/results "$S3_PATH"/test-results --recursive
-    aws s3 cp tests/logs "$S3_PATH"/ --recursive
+  - echo ">>>>>>>>>>>>>>>>>>>EXTERNAL_CONTRIBUTOR=${EXTERNAL_CONTRIBUTOR}"
+  - echo ">>>>>>>>>>>>>>>>>>>UPLOAD_URL=${UPLOAD_URL}"
